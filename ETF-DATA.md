@@ -1,8 +1,8 @@
 # ETF data and profiles
 
-The ETF directory links to `/etfs/<exchange:ticker>` profiles. The app tab bar retains these alongside stock tabs. The question mark opens the same profile. Chart preview remains separate.
+In the ETF directory, the ticker selects the inline chart and the question mark opens `/etfs/<exchange:ticker>` in an app tab. The global search palette includes the local ETF registry and recognizes exchange-qualified names such as `AMEX:VOO` or `VOO AMEX`.
 
-Only the TradingView chart is displayed. Its default indicator choices and interval are saved per browser by the app. The free embed does not expose arbitrary indicator input changes, drawings, or internal layout settings for the app to capture. Configure default indicator choices using **Default indicators** above a chart. No CSV upload is provided.
+Only the TradingView chart is displayed. Its indicator choices and interval are saved per browser by the app. **Save for** chooses global defaults or an exchange-qualified ticker override. Switching a ticker back to global removes its override. Other ticker overrides remain independent. The free embed does not expose arbitrary indicator input changes, drawings, or internal layout settings for the app to capture. Configure supported choices using **Indicators** above a chart. No CSV upload is provided.
 
 ## Data sources
 
@@ -14,6 +14,8 @@ Only the TradingView chart is displayed. Its default indicator choices and inter
 1D uses the previous available daily close. 7D and 1M use the close on or before the calendar cutoff. YTD uses the last close on or before prior year-end. Changes are price returns in listing currency and exclude dividends. The latest daily bar can be incomplete. Responses are cached for six hours.
 
 Holdings comparisons require two different reporting periods from the same SEC fund series. Positions match by ISIN, CUSIP or ticker, then security description; duplicate lots aggregate. Changes are percentage points of NAV, not returns or evidence of purchases/sales. Market movements, fund flows and security identifier changes can affect the comparison.
+
+Comparison inputs accept either date order, automatically sort earlier to later, and show errors beside the comparison controls. Dates initially use the latest loaded reporting date and its preceding quarter end. Two cutoffs resolving to the same report produce a specific explanation instead of a misleading comparison.
 
 ## Local setup
 

@@ -3,6 +3,17 @@ export type HoldingsSnapshot = { symbol: string; holdings: Holding[]; date: stri
 export type Performance = { price?: number; date?: string; day?: number | null; week?: number | null; month?: number | null; ytd?: number | null; error?: string };
 export type Overview = { funds: Record<string, Performance>; fetchedAt: string; note: string };
 export function etfProfilePath(tv: string) { return `/etfs/${encodeURIComponent(tv)}`; }
+export function comparisonDates(first: string, second: string) {
+    const valid = (date: string) => { const value = new Date(`${date}T00:00:00Z`); return /^\d{4}-\d{2}-\d{2}$/.test(date) && Number.isFinite(value.getTime()) && value.toISOString().slice(0, 10) === date; };
+    if (!first || !second || !valid(first) || !valid(second)) throw new Error('Choose two valid reporting cutoffs.');
+    if (first === second) throw new Error('Choose two different dates.');
+    return first < second ? { earlier: first, later: second, swapped: false } : { earlier: second, later: first, swapped: true };
+}
+export function priorQuarterEnd(date: string) {
+    const value = new Date(`${date}T00:00:00Z`);
+    return new Date(Date.UTC(value.getUTCFullYear(), Math.floor(value.getUTCMonth() / 3) * 3, 0)).toISOString().slice(0, 10);
+}
+export const ASSET_CATEGORY_LABELS: Record<string, string> = { EC: 'Equities', DBT: 'Bonds / debt', STIV: 'Short-term investments', DER: 'Derivatives', DE: 'Derivatives', RE: 'Real estate', RA: 'Repurchase agreements', CASH: 'Cash', OTH: 'Other assets', Unclassified: 'Unclassified' };
 const present = (value?: string | null) => value && !['nan', '<NA>', 'None', '-'].includes(value) ? value : '';
 function securityKey(holding: Holding) {
     const identifier = present(holding.isin) || present(holding.cusip) || present(holding.symbol) || `${holding.name}|${holding.title || ''}|${holding.maturityDate || ''}`;

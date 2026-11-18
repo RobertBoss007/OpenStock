@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { assetExposure, compareHoldings, etfProfilePath, type HoldingsSnapshot } from '../lib/etf-analytics';
+import { assetExposure, compareHoldings, comparisonDates, priorQuarterEnd, etfProfilePath, type HoldingsSnapshot } from '../lib/etf-analytics';
 const base: HoldingsSnapshot = { symbol: 'VOO', provider: 'sec', source: 'https://www.sec.gov/', date: '2025-12-31', seriesId: 'S123', holdings: [] };
 describe('ETF portfolio comparison', () => {
+    it('accepts screenshot dates in either order and chooses a prior reporting quarter', () => {
+        expect(comparisonDates('2026-11-18', '2026-05-01')).toEqual({ earlier: '2026-05-01', later: '2026-11-18', swapped: true });
+        expect(comparisonDates('2026-05-01', '2026-11-18').swapped).toBe(false);
+        expect(priorQuarterEnd('2026-06-30')).toBe('2026-03-31');
+        expect(priorQuarterEnd('2026-01-31')).toBe('2025-12-31');
+        expect(() => comparisonDates('2026-02-30', '2026-05-01')).toThrow('valid');
+        expect(() => comparisonDates('2026-05-01', '2026-05-01')).toThrow('different');
+    });
     it('aggregates duplicate security lots and detects exits and new positions', () => {
         const before = { ...base, holdings: [{ name: 'A', symbol: 'A', cusip: '123', weight: 2 }, { name: 'A', symbol: 'A', cusip: '123', weight: 1 }, { name: 'B', symbol: 'B', weight: 4 }] };
         const after = { ...base, date: '2026-03-31', holdings: [{ name: 'Renamed A', symbol: 'AA', cusip: '123', weight: 5 }, { name: 'C', symbol: 'C', weight: 1 }] };

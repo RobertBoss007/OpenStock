@@ -11,6 +11,8 @@ import { searchStocks } from "@/lib/actions/finnhub.actions";
 import { addSymbolToList } from "@/lib/actions/watchlist-lists.actions";
 import { useDebounce } from "@/hooks/useDebounce";
 import { cn } from "@/lib/utils";
+import { searchEtfs } from '@/lib/etf-search';
+import { etfProfilePath } from '@/lib/etf-analytics';
 
 const OPEN_SEARCH_EVENT = 'open-search';
 
@@ -48,7 +50,10 @@ export default function SearchCommand({ initialStocks }: { initialStocks: StockW
     useEffect(() => setMounted(true), []);
 
     const isSearchMode = !!searchTerm.trim();
-    const displayStocks = isSearchMode ? stocks : stocks?.slice(0, 10);
+    const localEtfs = searchEtfs(searchTerm);
+    const displayStocks: (StockWithWatchlistStatus & { etfTv?: string })[] = isSearchMode
+        ? [...localEtfs, ...stocks.filter((stock) => !localEtfs.some((fund) => fund.symbol === stock.symbol))]
+        : stocks?.slice(0, 10);
 
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
@@ -141,7 +146,7 @@ export default function SearchCommand({ initialStocks }: { initialStocks: StockW
                 {loading && <Loader2 className="search-loader" />}
             </div>
             <CommandList className="search-list">
-                {loading ? (
+                {loading && !localEtfs.length ? (
                     <CommandEmpty className="search-list-empty">{t('searching')}</CommandEmpty>
                 ) : displayStocks?.length === 0 ? (
                     <div className="search-list-indicator">
@@ -158,7 +163,7 @@ export default function SearchCommand({ initialStocks }: { initialStocks: StockW
                         {displayStocks?.map((stock) => (
                             <li key={stock.symbol} className={cn('search-item', listTarget && 'flex items-center gap-1 pe-2')}>
                                 <Link
-                                    href={`/stocks/${stock.symbol}`}
+                                    href={stock.etfTv ? etfProfilePath(stock.etfTv) : `/stocks/${stock.symbol}`}
                                     onClick={(e) => {
                                         // In list mode the row files the stock instead of navigating:
                                         // the prompt says "add", and the row is the biggest target.
