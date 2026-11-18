@@ -8,7 +8,7 @@ import { LayoutDashboard, Menu, Plus, Star, X } from "lucide-react";
 import { openSearch } from "@/components/SearchCommand";
 import { cn } from "@/lib/utils";
 
-const PINNED = ['/dashboard', '/watchlist'];
+const PINNED = ['/dashboard', '/watchlist', '/etfs'];
 const STORAGE_KEY = 'openstock-tabs';
 const MAX_TABS = 12;
 
@@ -26,7 +26,7 @@ const stockSymbol = (path: string) => {
 };
 
 const withTab = (tabs: string[], path: string) => {
-    if (!(stockSymbol(path) || PAGE_LABELS[path]) || tabs.includes(path)) return tabs;
+    if (!(stockSymbol(path) || PAGE_LABELS[path] || path === '/etfs') || tabs.includes(path)) return tabs;
     const next = [...tabs, path];
     const extra = next.length - MAX_TABS;
     return extra > 0 ? next.filter((t, i) => PINNED.includes(t) || i >= extra + PINNED.length) : next;
@@ -63,7 +63,7 @@ const TabBar = ({ onMenu }: { onMenu: () => void }) => {
         el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }, [pathname, tabs]);
 
-    const tabLabel = (path: string) => stockSymbol(path) ?? (PAGE_LABELS[path] ? t(`pages.${PAGE_LABELS[path]}`) : null);
+    const tabLabel = (path: string) => path === '/etfs' ? 'ETFs' : stockSymbol(path) ?? (PAGE_LABELS[path] ? t(`pages.${PAGE_LABELS[path]}`) : null);
 
     const closeTab = (path: string) => {
         const index = tabs.indexOf(path);

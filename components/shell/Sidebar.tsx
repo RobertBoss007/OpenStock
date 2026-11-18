@@ -48,6 +48,9 @@ const Sidebar = ({ user, watchlist }: SidebarProps) => {
             </button>
 
             <nav className="flex flex-col gap-0.5">
+                <Link href="/etfs" className={cn('side-item', pathname === '/etfs' && 'is-active')}>
+                    <BookOpen /> ETFs
+                </Link>
                 <Link href="/dashboard" className={cn('side-item', pathname === '/dashboard' && 'is-active')}>
                     <LayoutDashboard /> {t('overview')}
                 </Link>
