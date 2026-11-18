@@ -43,3 +43,5 @@ next-env.d.ts
 /dist/
 .vinext/
 .wrangler/
+__pycache__/
+*.pyc

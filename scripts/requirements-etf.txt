@@ -1,0 +1,2 @@
+edgartools==6.3.0
+yfinance==1.8.0

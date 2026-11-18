@@ -38,7 +38,11 @@ export default function StockChart({ tvSymbol, scriptUrl }: { tvSymbol: string; 
     const locale = useLocale();
     // null until the browser's saved list is read, so the chart mounts once with the right indicators
     const [studies, setStudies] = useState<string[] | null>(null);
-    useEffect(() => setStudies(readSaved()), []);
+    const [interval, setInterval] = useState('D');
+    useEffect(() => {
+        setStudies(readSaved());
+        try { const saved = localStorage.getItem('openstock:chart-default-interval'); if (saved && ['60', '240', 'D', 'W', 'M'].includes(saved)) setInterval(saved); } catch { /* Use daily candles. */ }
+    }, []);
 
     const toggle = (id: string) => {
         const current = studies ?? [];
@@ -48,9 +52,13 @@ export default function StockChart({ tvSymbol, scriptUrl }: { tvSymbol: string; 
     };
 
     const menu = (
+        <div className="flex flex-wrap items-center gap-2">
+        <label className="text-xs">Default interval <select className="rounded border border-line bg-card p-1" value={interval} onChange={(event) => {
+            setInterval(event.target.value); try { localStorage.setItem('openstock:chart-default-interval', event.target.value); } catch { /* Applies to this chart. */ }
+        }}>{[['60', '1 hour'], ['240', '4 hours'], ['D', 'Daily'], ['W', 'Weekly'], ['M', 'Monthly']].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <DropdownMenu>
             <DropdownMenuTrigger className="btn btn-ghost h-8 px-2.5 text-[13px]" disabled={!studies}>
-                <SlidersHorizontal /> {t('indicatorsButton')}{studies?.length ? <span className="num text-faint">{studies.length}</span> : null}
+                <SlidersHorizontal /> Default indicators{studies?.length ? <span className="num text-faint">{studies.length}</span> : null}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="text-[12px] font-normal text-faint">{t('keptNote')}</DropdownMenuLabel>
@@ -61,12 +69,14 @@ export default function StockChart({ tvSymbol, scriptUrl }: { tvSymbol: string; 
                 ))}
             </DropdownMenuContent>
         </DropdownMenu>
+        </div>
     );
 
     return (
         <Panel title={t('title')} sub={t('sub')} action={menu}>
+            <p className="mb-2 px-1 text-xs text-muted-foreground">Default indicator choices and interval apply across charts in this browser. TradingView controls individual indicator parameters inside the current chart.</p>
             {studies ? (
-                <TradingViewWidget scriptUrl={scriptUrl} config={{ ...CANDLE_CHART_WIDGET_CONFIG(tvSymbol, locale), studies }} height={CHART_HEIGHT} allowExpand
+                <TradingViewWidget scriptUrl={scriptUrl} config={{ ...CANDLE_CHART_WIDGET_CONFIG(tvSymbol, locale), studies, interval }} height={CHART_HEIGHT} allowExpand
                     labels={{ fullScreen: tw('fullScreen'), exitFullScreen: tw('exitFullScreen'), exitFullScreenHint: tw('exitFullScreenHint') }} />
             ) : (
                 <div className="tv-frame" style={{ height: CHART_HEIGHT }} />

@@ -24,9 +24,14 @@ const stockSymbol = (path: string) => {
     const stock = path.match(/^\/stocks\/([^/]+)$/);
     return stock ? decodeURIComponent(stock[1]).toUpperCase() : null;
 };
+const etfSymbol = (path: string) => {
+    const match = path.match(/^\/etfs\/([^/]+)$/);
+    if (!match) return null;
+    try { return `${decodeURIComponent(match[1]).split(':').pop()} ETF`; } catch { return null; }
+};
 
 const withTab = (tabs: string[], path: string) => {
-    if (!(stockSymbol(path) || PAGE_LABELS[path] || path === '/etfs') || tabs.includes(path)) return tabs;
+    if (!(stockSymbol(path) || etfSymbol(path) || PAGE_LABELS[path] || path === '/etfs') || tabs.includes(path)) return tabs;
     const next = [...tabs, path];
     const extra = next.length - MAX_TABS;
     return extra > 0 ? next.filter((t, i) => PINNED.includes(t) || i >= extra + PINNED.length) : next;
@@ -63,7 +68,7 @@ const TabBar = ({ onMenu }: { onMenu: () => void }) => {
         el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }, [pathname, tabs]);
 
-    const tabLabel = (path: string) => path === '/etfs' ? 'ETFs' : stockSymbol(path) ?? (PAGE_LABELS[path] ? t(`pages.${PAGE_LABELS[path]}`) : null);
+    const tabLabel = (path: string) => path === '/etfs' ? 'ETFs' : stockSymbol(path) ?? etfSymbol(path) ?? (PAGE_LABELS[path] ? t(`pages.${PAGE_LABELS[path]}`) : null);
 
     const closeTab = (path: string) => {
         const index = tabs.indexOf(path);
